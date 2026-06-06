@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexHire — AI Job Application System</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Unbounded:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ── HEADER ── -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">🎯</div>
+      <div>
+        <div class="brand-name">Nex<span>Hire</span></div>
+        <div class="brand-tag">AI Job Application System</div>
+      </div>
+    </div>
+    <div class="status-pill" onclick="checkHealth()">
+      <div class="dot" id="dot"></div>
+      <span id="statusTxt">Checking...</span>
+    </div>
+  </header>
+
+  <!-- ── NAV ── -->
+  <div class="nav">
+    <button class="nav-btn active" onclick="showPage('profile',this)">👤 Profile</button>
+    <button class="nav-btn"        onclick="showPage('search',this)">🔍 Find Jobs</button>
+    <button class="nav-btn"        onclick="showPage('dashboard',this)">📊 Dashboard</button>
+  </div>
+
+  <!-- ── PROFILE PAGE ── -->
+  <div class="page active" id="page-profile">
+    <div class="card">
+      <div class="card-title"><div class="c-icon">👤</div>Your Profile</div>
+      <div class="notice">
+        Fill in your details once. NexHire will use this to tailor every application automatically.
+      </div>
+
+      <div class="row2">
+        <div class="fg" style="margin:0">
+          <label>Full Name</label>
+          <input type="text" id="p-name" placeholder="Your Full Name">
+        </div>
+        <div class="fg" style="margin:0">
+          <label>Email</label>
+          <input type="email" id="p-email" placeholder="your@email.com">
+        </div>
+      </div>
+
+      <div class="fg">
+        <label>Phone</label>
+        <input type="text" id="p-phone" placeholder="+1 234 567 8900">
+      </div>
+
+      <div class="fg">
+        <label>Skills (comma separated)</label>
+        <input type="text" id="p-skills" placeholder="Python, React, Machine Learning, FastAPI">
+      </div>
+
+      <div class="row2">
+        <div class="fg" style="margin:0">
+          <label>Preferred Job Roles</label>
+          <input type="text" id="p-roles" placeholder="Software Engineer, AI Developer">
+        </div>
+        <div class="fg" style="margin:0">
+          <label>Preferred Location</label>
+          <input type="text" id="p-location" placeholder="City, Remote">
+        </div>
+      </div>
+
+      <!-- CV Upload -->
+      <div class="fg">
+        <label>Your CV / Resume</label>
+        <div id="cv-upload-zone" class="upload-zone"
+          onclick="document.getElementById('cv-file-input').click()"
+          ondragover="event.preventDefault();this.style.borderColor='var(--a)'"
+          ondragleave="this.style.borderColor='var(--bd2)'"
+          ondrop="handleCvDrop(event)">
+          <input type="file" id="cv-file-input" accept=".pdf,.docx,.txt"
+            style="display:none" onchange="uploadCv(event)">
+          <div style="font-size:24px;margin-bottom:6px">📄</div>
+          <div style="font-family:'Unbounded',sans-serif;font-size:12px;font-weight:700;margin-bottom:4px">
+            Drop your CV here — PDF, DOCX or TXT
+          </div>
+          <div style="font-size:10px;color:var(--ts)">Click to browse or drag & drop</div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <div style="flex:1;height:1px;background:var(--bd)"></div>
+          <span style="font-size:10px;color:var(--ts);letter-spacing:2px">YA</span>
+          <div style="flex:1;height:1px;background:var(--bd)"></div>
+        </div>
+
+        <textarea id="p-cv" rows="8" placeholder="Paste your full CV text here..."></textarea>
+      </div>
+
+      <button class="btn btn-full" onclick="saveProfile()">💾 Save Profile</button>
+      <div id="profile-msg" style="margin-top:12px;font-size:11px;text-align:center;"></div>
+    </div>
+  </div>
+
+  <!-- ── SEARCH PAGE ── -->
+  <div class="page" id="page-search">
+    <div class="card">
+      <div class="card-title"><div class="c-icon">🔍</div>Search Jobs</div>
+      <div class="notice">
+        <strong>Semi-Automatic:</strong> NexHire real jobs scrape karta hai.
+        AI har job ke liye CV tailor karta hai. Tum ek click se apply karte ho.
+      </div>
+
+      <div class="row2">
+        <div class="fg" style="margin:0">
+          <label>Job Title / Keywords</label>
+          <input type="text" id="s-keyword" placeholder="Software Engineer">
+        </div>
+        <div class="fg" style="margin:0">
+          <label>Location</label>
+          <input type="text" id="s-location" placeholder="City or Remote">
+        </div>
+      </div>
+
+      <div class="row2">
+        <div class="fg" style="margin:0">
+          <label>Source</label>
+          <select id="s-source">
+            <option value="linkedin">LinkedIn</option>
+            <option value="indeed">Indeed</option>
+          </select>
+        </div>
+        <div class="fg" style="margin:0">
+          <label>Number of Jobs</label>
+          <input type="number" id="s-limit" value="10" min="5" max="30">
+        </div>
+      </div>
+
+      <button class="btn btn-full" onclick="searchJobs()">🔍 Search Jobs</button>
+    </div>
+
+    <div id="jobs-loading" style="display:none">
+      <div class="loading">
+        <div class="spin"></div>
+        <div class="loading-txt">Searching jobs...</div>
+        <div style="font-size:11px;color:var(--ts)">Scraping LinkedIn/Indeed — 10-20 seconds</div>
+      </div>
+    </div>
+
+    <div id="jobs-list"></div>
+  </div>
+
+  <!-- ── DASHBOARD PAGE ── -->
+  <div class="page" id="page-dashboard">
+    <div class="card" style="padding:18px 24px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="card-title" style="margin:0"><div class="c-icon">📊</div>Applications Dashboard</div>
+        <button class="btn btn-ghost btn-sm" onclick="loadDashboard()">🔄 Refresh</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px">
+      <div class="card" style="padding:16px;text-align:center">
+        <div style="font-size:24px;font-family:'Unbounded',sans-serif;font-weight:900;color:var(--a)" id="stat-total">0</div>
+        <div style="font-size:10px;color:var(--ts);margin-top:4px;letter-spacing:1px">TOTAL</div>
+      </div>
+      <div class="card" style="padding:16px;text-align:center">
+        <div style="font-size:24px;font-family:'Unbounded',sans-serif;font-weight:900;color:var(--g)" id="stat-applied">0</div>
+        <div style="font-size:10px;color:var(--ts);margin-top:4px;letter-spacing:1px">APPLIED</div>
+      </div>
+      <div class="card" style="padding:16px;text-align:center">
+        <div style="font-size:24px;font-family:'Unbounded',sans-serif;font-weight:900;color:#60a5fa" id="stat-interview">0</div>
+        <div style="font-size:10px;color:var(--ts);margin-top:4px;letter-spacing:1px">INTERVIEW</div>
+      </div>
+      <div class="card" style="padding:16px;text-align:center">
+        <div style="font-size:24px;font-family:'Unbounded',sans-serif;font-weight:900;color:var(--y)" id="stat-pending">0</div>
+        <div style="font-size:10px;color:var(--ts);margin-top:4px;letter-spacing:1px">PENDING</div>
+      </div>
+    </div>
+
+    <div id="apps-list"></div>
+  </div>
+
+</div>
+
+<!-- ── MODAL ── -->
+<div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:100;overflow-y:auto;padding:20px">
+  <div style="max-width:700px;margin:0 auto;background:var(--s1);border:1px solid var(--bd);border-radius:18px;padding:28px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div id="modal-title" style="font-family:'Unbounded',sans-serif;font-size:15px;font-weight:700"></div>
+      <button onclick="closeModal()"
+        style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:6px 12px;color:var(--ts);cursor:pointer;font-size:12px">
+        ✕ Close
+      </button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<div style="height:60px"></div>
+
+<!-- ── SCRIPTS ── -->
+<script>
+  let currentUserId = localStorage.getItem('nexhire_user_id') || null;
+  let currentJobs   = [];
+</script>
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/profile.js"></script>
+<script src="js/jobs.js"></script>
+<script src="js/dashboard.js"></script>
+<script>
+  // Init
+  checkHealth();
+  loadProfileFromStorage();
+</script>
+
+</body>
+</html>
